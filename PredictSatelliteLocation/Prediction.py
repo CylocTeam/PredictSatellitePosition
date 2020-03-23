@@ -1,7 +1,8 @@
-import numpy as np
 from skyfield.api import Topos, load
-import params
+from datetime import datetime
 import pandas as pd
+import numpy as np
+import params
 
 
 class Prediction:
@@ -20,10 +21,19 @@ class Prediction:
         """
 
     def get_TLE_file_time(self):
+        """
+        get_TLE_file_time returns the utc time of the tle file in datetime format
+        """
         # all satellites in the tle file are with the same epoch
         # therefore we use the first
         first_sat = self.tle_satellites_names.iloc[0]
         satellite = self.tle_load_satellites[first_sat]
+        tle_time_vec = satellite.epoch.utc
+
+        self.tle_time = datetime(tle_time_vec[0], tle_time_vec[1], tle_time_vec[2],
+                                 tle_time_vec[3], tle_time_vec[4], np.int(np.floor(tle_time_vec[5])),
+                                 np.int(np.mod(tle_time_vec[5], 1) * 1000))
+        return self.tle_time
 
     def predict_satellite_position_TLE(self, path_TLE_):
         pass
