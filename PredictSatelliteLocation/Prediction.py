@@ -27,12 +27,12 @@ class Prediction:
         try:
             date_time_obj = datetime.strptime(obs_datetime_str, '%Y-%m-%d %H:%M:%S.%f')
             t = ts.utc(date_time_obj.year, date_time_obj.month, date_time_obj.day, date_time_obj.hour,
-                       date_time_obj.minute, date_time_obj.second, np.int(date_time_obj.microsecond / 1000))
+                       date_time_obj.minute, date_time_obj.second + date_time_obj.microsecond / 1e6)
         except Exception as c:
             date_time_obj = datetime.strptime(obs_datetime_str, '%Y-%m-%d %H:%M:%S')
             t = ts.utc(date_time_obj.year, date_time_obj.month, date_time_obj.day, date_time_obj.hour,
                        date_time_obj.minute, date_time_obj.second)
-            self.obs_time = t
+        self.obs_time = t
 
     def get_TLE_file_time(self):
         """
