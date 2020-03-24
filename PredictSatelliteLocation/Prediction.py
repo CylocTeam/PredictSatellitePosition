@@ -14,11 +14,24 @@ class Prediction:
         self.obs_lon = None
         self.obs_lat = None
 
-    def set_observation_time(self, time_str):
+    def set_observation_time(self, obs_datetime_str):
         """
-        set_observation_time - sets observation time
-        time str
+        set_observation_time - sets observation utc time
+        Inputs:
+            obs_datetime_str - string of observation utc time in the following format
+                                '%Y-%m-%d %H:%M:%S.%f' for example  '2018-06-29 08:15:27.243860' or
+                                '%Y-%m-%d %H:%M:%S' for example  '2018-06-29 08:15:27'
         """
+        ts = load.timescale()
+        try:
+            date_time_obj = datetime.strptime(obs_datetime_str, '%Y-%m-%d %H:%M:%S.%f')
+            t = ts.utc(date_time_obj.year, date_time_obj.month, date_time_obj.day, date_time_obj.hour,
+                       date_time_obj.minute, date_time_obj.second, np.int(date_time_obj.microsecond/1000))
+        except Exception as c:
+            date_time_obj = datetime.strptime(obs_datetime_str, '%Y-%m-%d %H:%M:%S')
+            t = ts.utc(date_time_obj.year, date_time_obj.month, date_time_obj.day, date_time_obj.hour,
+                       date_time_obj.minute, date_time_obj.second)
+            self.obs_time = t
 
     def get_TLE_file_time(self):
         """
