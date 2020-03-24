@@ -13,6 +13,7 @@ class Prediction:
         self.obs_time = None
         self.obs_lon = None
         self.obs_lat = None
+        self.satellites_position_tle = pd.DataFrame(columns=['satellite', 'elevation', 'azimuth', 'time'])
 
     def set_observation_time(self, obs_datetime_str):
         """
@@ -26,7 +27,7 @@ class Prediction:
         try:
             date_time_obj = datetime.strptime(obs_datetime_str, '%Y-%m-%d %H:%M:%S.%f')
             t = ts.utc(date_time_obj.year, date_time_obj.month, date_time_obj.day, date_time_obj.hour,
-                       date_time_obj.minute, date_time_obj.second, np.int(date_time_obj.microsecond/1000))
+                       date_time_obj.minute, date_time_obj.second, np.int(date_time_obj.microsecond / 1000))
         except Exception as c:
             date_time_obj = datetime.strptime(obs_datetime_str, '%Y-%m-%d %H:%M:%S')
             t = ts.utc(date_time_obj.year, date_time_obj.month, date_time_obj.day, date_time_obj.hour,
@@ -60,10 +61,15 @@ class Prediction:
         if self.obs_lon is None:
             print('Please set observation location, your observation lon and lat are none')
             return
-        
-        for satellite, idx in zip(self.tle_satellites_names, np.range(len(self.tle_satellites_names))):
-            pass
-
+        obs_position = Topos(np.str(self.obs_lat) + ' N', np.str(self.obs_lon) + ' W')
+        for current_satellite in self.tle_satellites_names:
+            current_satellite_position = self.get_satellite_position_TLE(current_satellite)
+            difference = current_satellite_position - obs_position
+            difference_at_obs_time = difference.at(self.obs_time)
+            elev_tle, az_tle, distance_tle = difference_at_obs_time.altaz()
+            current_row = {'satellite': current_satellite, 'elevation': elev_tle, 'azimuth': az_tle,
+                           'time': self.obs_time}
+            self.satellites_position_tle.append(current_row, ignore_index=True)
 
     def get_satellite_position_TLE(self, satellite_TLE_name):
         satellite = self.tle_file[satellite_TLE_name]
