@@ -73,7 +73,7 @@ class Prediction:
         return self.satellites_position_tle
 
     def get_satellite_position_TLE(self, satellite_TLE_name):
-        satellite = self.tle_file[satellite_TLE_name]
+        satellite = self.tle_load_satellites[satellite_TLE_name]
         if self.obs_time is None:
             print('Please set observation time, your observation time is none')
             return
