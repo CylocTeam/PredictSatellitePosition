@@ -70,6 +70,7 @@ class Prediction:
             current_row = {'satellite': current_satellite, 'elevation': elev_tle, 'azimuth': az_tle,
                            'time': self.obs_time}
             self.satellites_position_tle.append(current_row, ignore_index=True)
+        return self.satellites_position_tle
 
     def get_satellite_position_TLE(self, satellite_TLE_name):
         satellite = self.tle_file[satellite_TLE_name]
