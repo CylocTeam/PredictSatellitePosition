@@ -66,7 +66,6 @@ class Prediction:
             print('Please set observation location, your observation lon and lat are none')
             return
         obs_position = Topos(np.str(self.obs_lat) + ' N', np.str(self.obs_lon) + ' W')
-        satellites_position_tle = pd.DataFrame(columns=['satellite', 'elevation', 'azimuth', 'time'])
         for current_satellite in self.tle_satellites_names:
             current_satellite_position = self.get_satellite_position_TLE(current_satellite)
             if not current_satellite_position is None:
@@ -75,8 +74,7 @@ class Prediction:
                 elev_tle, az_tle, distance_tle = difference_at_obs_time.altaz()
                 current_row = {'satellite': current_satellite, 'elevation': np.float(elev_tle.degrees),
                                'azimuth': np.float(az_tle.degrees), 'time': str(self.obs_datetime)}
-                satellites_position_tle = satellites_position_tle.append(current_row, ignore_index=True)
-                # self.satellites_position_tle.append(current_row)
+                self.satellites_position_tle = self.satellites_position_tle.append(current_row, ignore_index=True)
         return self.satellites_position_tle
 
     def get_satellite_position_TLE(self, satellite_TLE_name):
