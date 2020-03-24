@@ -1,7 +1,5 @@
 from skyfield.api import Topos, load
 from datetime import datetime
-from astropy import units as u
-from astropy.coordinates import Angle
 import pandas as pd
 import numpy as np
 import params
