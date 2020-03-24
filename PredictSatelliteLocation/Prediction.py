@@ -52,8 +52,18 @@ class Prediction:
         self.obs_lon = obs_lon
         self.obs_lat = obs_lat
 
-    def predict_satellite_position_TLE(self, path_TLE_):
-        pass
+    def get_all_satellites_position_relative_to_obs_TLE(self):
+
+        if self.obs_time is None:
+            print('Please set observation time, your observation time is none')
+            return
+        if self.obs_lon is None:
+            print('Please set observation location, your observation lon and lat are none')
+            return
+        
+        for satellite, idx in zip(self.tle_satellites_names, np.range(len(self.tle_satellites_names))):
+            pass
+
 
     def get_satellite_position_TLE(self, satellite_TLE_name):
         satellite = self.tle_file[satellite_TLE_name]
