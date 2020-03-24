@@ -48,8 +48,18 @@ class Prediction:
                                  np.int(np.mod(tle_time_vec[5], 1) * 1000))
         return self.tle_time
 
+    def set_observation_location(self, obs_lon, obs_lat):
+        self.obs_lon = obs_lon
+        self.obs_lat = obs_lat
+
     def predict_satellite_position_TLE(self, path_TLE_):
         pass
 
-    def get_satellite_position(self, satellite_TLE_name):
+    def get_satellite_position_TLE(self, satellite_TLE_name):
         satellite = self.tle_file[satellite_TLE_name]
+        if self.obs_time is None:
+            print('Please set observation time, your observation time is none')
+            return
+        geocentric = satellite.at(self.obs_time)
+        satellite_position_tle = geocentric.subpoint()
+        return satellite_position_tle
