@@ -2,19 +2,24 @@ from skyfield.api import Topos, load
 from datetime import datetime
 import pandas as pd
 import numpy as np
+import georinex as gr
 import params
+
 
 
 class Prediction:
     def __init__(self, path_TLE=None, path_RINEX=None):
-        self.tle_load_satellites = load.tle(path_TLE)
-        self.tle_satellites_names = pd.read_csv(params.GPS_TLE_NAMES_PATH, header=None)[0]
-        self.rinex_satelltes = ""
+        if not path_TLE is None:
+            self.tle_load_satellites = load.tle(path_TLE)
+            self.tle_satellites_names = pd.read_csv(params.GPS_TLE_NAMES_PATH, header=None)[0]
+            self.satellites_position_tle = pd.DataFrame(columns=['satellite', 'elevation', 'azimuth', 'time'])
+        if not path_RINEX is None:
+            self.rinex_satelltes = gr.load(path_RINEX)
         self.obs_time = None
         self.obs_datetime = None
         self.obs_lon = None
         self.obs_lat = None
-        self.satellites_position_tle = pd.DataFrame(columns=['satellite', 'elevation', 'azimuth', 'time'])
+
 
     def set_observation_time(self, obs_datetime_str):
         """
@@ -36,6 +41,10 @@ class Prediction:
         self.obs_time = t
         self.obs_datetime = date_time_obj
 
+    def set_observation_location(self, obs_lon, obs_lat):
+        self.obs_lon = obs_lon
+        self.obs_lat = obs_lat
+
     def get_TLE_file_time(self):
         """
         get_TLE_file_time returns the utc time of the tle file in datetime format
@@ -50,10 +59,6 @@ class Prediction:
                                  tle_time_vec[3], tle_time_vec[4], np.int(np.floor(tle_time_vec[5])),
                                  np.int(np.mod(tle_time_vec[5], 1) * 1000))
         return self.tle_time
-
-    def set_observation_location(self, obs_lon, obs_lat):
-        self.obs_lon = obs_lon
-        self.obs_lat = obs_lat
 
     def get_all_satellites_position_relative_to_obs_TLE(self):
 
@@ -87,3 +92,5 @@ class Prediction:
         geocentric = satellite.at(self.obs_time)
         satellite_position_tle = geocentric.subpoint()
         return satellite_position_tle
+
+
