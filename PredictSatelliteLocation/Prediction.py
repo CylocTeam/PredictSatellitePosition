@@ -1,5 +1,7 @@
 from skyfield.api import Topos, load
 from datetime import datetime
+from astropy import units as u
+from astropy.coordinates import Angle
 import pandas as pd
 import numpy as np
 import params
@@ -11,6 +13,7 @@ class Prediction:
         self.tle_satellites_names = pd.read_csv(params.GPS_TLE_NAMES_PATH, header=None)[0]
         self.rinex_satelltes = ""
         self.obs_time = None
+        self.obs_datetime = None
         self.obs_lon = None
         self.obs_lat = None
         self.satellites_position_tle = pd.DataFrame(columns=['satellite', 'elevation', 'azimuth', 'time'])
@@ -33,6 +36,7 @@ class Prediction:
             t = ts.utc(date_time_obj.year, date_time_obj.month, date_time_obj.day, date_time_obj.hour,
                        date_time_obj.minute, date_time_obj.second)
         self.obs_time = t
+        self.obs_datetime = date_time_obj
 
     def get_TLE_file_time(self):
         """
