@@ -11,6 +11,7 @@ class Prediction:
         self.tle_satellites_names = pd.read_csv(params.GPS_TLE_NAMES_PATH, header=None)[0]
         self.rinex_satelltes = ""
         self.obs_time = None
+        self.obs_datetime = None
         self.obs_lon = None
         self.obs_lat = None
         self.satellites_position_tle = pd.DataFrame(columns=['satellite', 'elevation', 'azimuth', 'time'])
@@ -27,12 +28,13 @@ class Prediction:
         try:
             date_time_obj = datetime.strptime(obs_datetime_str, '%Y-%m-%d %H:%M:%S.%f')
             t = ts.utc(date_time_obj.year, date_time_obj.month, date_time_obj.day, date_time_obj.hour,
-                       date_time_obj.minute, date_time_obj.second, np.int(date_time_obj.microsecond / 1000))
+                       date_time_obj.minute, date_time_obj.second + date_time_obj.microsecond / 1e6)
         except Exception as c:
             date_time_obj = datetime.strptime(obs_datetime_str, '%Y-%m-%d %H:%M:%S')
             t = ts.utc(date_time_obj.year, date_time_obj.month, date_time_obj.day, date_time_obj.hour,
                        date_time_obj.minute, date_time_obj.second)
-            self.obs_time = t
+        self.obs_time = t
+        self.obs_datetime = date_time_obj
 
     def get_TLE_file_time(self):
         """
@@ -64,15 +66,21 @@ class Prediction:
         obs_position = Topos(np.str(self.obs_lat) + ' N', np.str(self.obs_lon) + ' W')
         for current_satellite in self.tle_satellites_names:
             current_satellite_position = self.get_satellite_position_TLE(current_satellite)
-            difference = current_satellite_position - obs_position
-            difference_at_obs_time = difference.at(self.obs_time)
-            elev_tle, az_tle, distance_tle = difference_at_obs_time.altaz()
-            current_row = {'satellite': current_satellite, 'elevation': elev_tle, 'azimuth': az_tle,
-                           'time': self.obs_time}
-            self.satellites_position_tle.append(current_row, ignore_index=True)
+            if not current_satellite_position is None:
+                difference = current_satellite_position - obs_position
+                difference_at_obs_time = difference.at(self.obs_time)
+                elev_tle, az_tle, distance_tle = difference_at_obs_time.altaz()
+                current_row = {'satellite': current_satellite, 'elevation': np.float(elev_tle.degrees),
+                               'azimuth': np.float(az_tle.degrees), 'time': str(self.obs_datetime)}
+                self.satellites_position_tle = self.satellites_position_tle.append(current_row, ignore_index=True)
+        return self.satellites_position_tle
 
     def get_satellite_position_TLE(self, satellite_TLE_name):
-        satellite = self.tle_file[satellite_TLE_name]
+        try:
+            satellite = self.tle_load_satellites[satellite_TLE_name]
+        except Exception as c:
+            print('satellite:'+satellite_TLE_name+'is not in the TLE file')
+            return
         if self.obs_time is None:
             print('Please set observation time, your observation time is none')
             return
