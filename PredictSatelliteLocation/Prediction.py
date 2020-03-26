@@ -3,18 +3,17 @@ from datetime import datetime
 import pandas as pd
 import numpy as np
 import georinex as gr
-import params
-
 
 
 class Prediction:
-    def __init__(self, path_TLE=None, path_RINEX=None):
+    def __init__(self, path_TLE=None, path_RINEX=None, TLE_satellite_names = None, RINEX_satellite_names = None):
         if not path_TLE is None:
             self.tle_load_satellites = load.tle(path_TLE)
-            self.tle_satellites_names = pd.read_csv(params.GPS_TLE_NAMES_PATH, header=None)[0]
+            self.tle_satellites_names = pd.read_csv(TLE_satellite_names, header=None)[0]
             self.satellites_position_tle = pd.DataFrame(columns=['satellite', 'elevation', 'azimuth', 'time'])
         if not path_RINEX is None:
             self.rinex_satelltes = gr.load(path_RINEX)
+            times = gr.gettime(path_RINEX)
         self.obs_time = None
         self.obs_datetime = None
         self.obs_lon = None
